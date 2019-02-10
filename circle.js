@@ -143,10 +143,9 @@ function createShaders(c1, c2, c3, c4){
 		 
 		 function drawBacteria(){
 				//createShaders(0,0,0,1);
-				var x = getRandomLoc();
-				var y = getRandomLoc();
+				var coord = getRandomLoc();
 				
-				gl.viewport(x,y,100,100);
+				gl.viewport(coord[0]-50,coord[1]-50,100,100);
 
 				 // Draw the triangle
 				 gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
@@ -154,7 +153,14 @@ function createShaders(c1, c2, c3, c4){
 		 }
 		 
 		 function getRandomLoc(){
-			 return Math.floor(Math.random() * Math.floor(500));
+			var rand = Math.random();
+			var angle = (rand*Math.PI*2);
+			var coord = [2];
+			console.log(angle);
+			coord[0] = 250+250*Math.cos(-angle);
+			console.log(coord[0]);
+			coord[1] = 250+250*Math.sin(-angle);
+			 return coord;
 		 }
 
 		 
