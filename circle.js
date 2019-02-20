@@ -4,12 +4,12 @@ var gl = canvas.getContext('experimental-webgl');
 var width = canvas.getAttribute("width"), height = canvas.getAttribute("height");
 
 //all possible colours to randomly choose from
-var colours = [
+/*var colours = [
 	[0,0,1,1],
 	[1,0,0,1],
 	[0,1,0,1],
 	[1,0,1,1]
-]
+]*/
 
 // Fullscreen if not set
 if (width) {
@@ -142,15 +142,14 @@ drawMainCircle();
 function drawMainCircle(){
 	createShaders([0,0,0,0]);
 	// Set the view port
-	gl.viewport(0,0,canvas.width,canvas.height);
+	gl.viewport(canvas.width * 0.1, canvas.height * 0.1, canvas.width * 0.8, canvas.height * 0.8);
 
 	gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
 }
 		 
-function drawBacteria(){
-	var randomColour = Math.floor(Math.random() * 4);
-	createShaders(colours[randomColour]);
-	console.log(randomColour);
+function drawBacteria() {
+	//var randomColour = Math.floor(Math.random() * 4);
+	createShaders(getRandomColour());
 	var coord = getRandomLoc();
 	console.log(coord[1]);
 				
@@ -160,14 +159,34 @@ function drawBacteria(){
 }
 		 
 function getRandomLoc(){
-	var rand = Math.random();
+    var rand = Math.floor(20 * Math.random()) / 20.0;
 	var angle = (rand*Math.PI*2);
 	var coord = [2];
 
-	coord[0] = 250+250*Math.cos(-angle);
+	coord[0] = canvas.width / 2 + canvas.width * 0.8/2 * Math.cos(-angle);
 	console.log(coord[0]);
-	coord[1] = 250+250*Math.sin(-angle);
+	coord[1] = canvas.height / 2 + canvas.height * 0.8/2 * Math.sin(-angle);
 	return coord;
+}
+
+function getRandomColour(min, max)
+{
+    //Random Colour
+    min = 0.2;
+    max = 0.8;
+    colour = [min, max, Math.random() * (max - min) + min, 1];
+    pos = Math.floor(Math.random() * 3);
+    p = colour[0];
+    colour[0] = colour[pos];
+    colour[pos] = p;
+    pos = Math.floor(Math.random() * 2 + 1);
+    p = colour[1];
+    colour[1] = colour[pos];
+    colour[pos] = p;
+
+    console.log(colour);
+
+    return colour;
 }
 
 var canvasLeft = canvas.offsetLeft, canvasTop = canvas.offsetTop;
