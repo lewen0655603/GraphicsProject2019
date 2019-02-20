@@ -149,7 +149,7 @@ function drawMainCircle(){
 		 
 function drawBacteria() {
 	//var randomColour = Math.floor(Math.random() * 4);
-	createShaders(getRandomColour());
+	createShaders(getRandomColour(0.2, 0.8));
 	var coord = getRandomLoc();
 	console.log(coord[1]);
 				
@@ -171,9 +171,6 @@ function getRandomLoc(){
 
 function getRandomColour(min, max)
 {
-    //Random Colour
-    min = 0.2;
-    max = 0.8;
     colour = [min, max, Math.random() * (max - min) + min, 1];
     pos = Math.floor(Math.random() * 3);
     p = colour[0];
