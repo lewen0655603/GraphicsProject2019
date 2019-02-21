@@ -9,6 +9,11 @@ var circleCoords = [];
 var circleRadius = 10;
 var circleAlive = [];
 
+var clickAnimationFrame;
+var clickAnimationX;
+var clickAnimationY;
+var clickAnimationRadius;
+
 //all possible colours to randomly choose from
 /*var colours = [
 	[0,0,1,1],
@@ -193,6 +198,22 @@ function animateBacteria(){
     
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
+    if (clickAnimationFrame > 0){
+        clickAnimationRadius = 50 - clickAnimationFrame
+        
+        gl.useProgram(createShaders([1, 0, 0, clickAnimationFrame/50]));
+        
+        gl.viewport(
+            clickAnimationX - clickAnimationRadius/2,
+            clickAnimationY - clickAnimationRadius/2,
+            clickAnimationRadius,
+            clickAnimationRadius)
+        
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
+        
+        clickAnimationFrame--;
+    }
+    
     for(var i = 0; i < 10; i++){
         if (circleAlive[i] == true){
 
@@ -217,6 +238,7 @@ function animateBacteria(){
 				if(checkIntersection(i, j))
 				{
 					console.log("Circle "+(j)+" and Circle "+i+" are intersecting");
+                    circleAlive[i] = false;
 				}
 			}
 		}
@@ -258,7 +280,8 @@ function checkIntersection(firstCircle, secondCircle)
 {
 	var dx = circleCoords[firstCircle][0] - circleCoords[secondCircle][0];
 	var dy = circleCoords[firstCircle][2] - circleCoords[secondCircle][2];
-	if(Math.sqrt((dx*dx)+(dy*dy)) <= (2*circleRadius))
+	//if(Math.sqrt((dx*dx)+(dy*dy)) <= (2*circleRadius))
+    if(Math.abs(dx) <= (circleRadius) && Math.abs(dy) <= (circleRadius))
 	{
 		return true;
 	}
@@ -281,9 +304,13 @@ canvas.addEventListener('click', function(event){
 		//y-circley
 		var dy = y - circleCoords[i][2];
 		var d = Math.sqrt(dx*dx + dy*dy);
-		if(d <= circleRadius && circleAlive[i] == true)
+		if(d <= circleRadius/2 && circleAlive[i] == true)
 		{
 			circleAlive[i] = false;
+            
+            clickAnimationFrame = 50;
+            clickAnimationX = x;
+            clickAnimationY = Math.abs(canvas.getBoundingClientRect().bottom - y);
 		}
 	}
 });
