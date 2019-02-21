@@ -231,13 +231,12 @@ function animateBacteria(){
         }
     }
 	
-	for(var i = 0; i < 10; i++)
+	for(var i = 0; i < 9; i++)
 	{
-		for(var j = 0; j < 10; j++)
+	    if (circleAlive[i])
+		for(var j = i+1; j < 10; j++)
 		{
-			if((circleAlive[i]==true&&circleAlive[j]==true)&& (i != j))
-			{
-				if(checkIntersection(i, j, circleRadius[i], circleRadius[j]))
+			    if(circleAlive[j]&&checkIntersection(i, j, circleRadius[i], circleRadius[j]))
 				{
 					console.log("Circle "+(j)+" and Circle "+i+" are intersecting");
                     
@@ -252,7 +251,7 @@ function animateBacteria(){
                         circleRadius[j] = Math.sqrt(circleRadius[i] * circleRadius[i] + circleRadius[j] * circleRadius[j])
                     }
 				}
-			}
+			
 		}
 	}
     drawMainCircle();
