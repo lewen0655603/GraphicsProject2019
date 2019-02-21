@@ -6,7 +6,7 @@ var width = canvas.getAttribute("width"), height = canvas.getAttribute("height")
 var shaders = [];
 var circleColours = [];
 var circleCoords = [];
-var circleRadius = 10;
+var circleRadius = 100;
 var circleAlive = [];
 
 //all possible colours to randomly choose from
@@ -181,7 +181,7 @@ function drawBacteriaCircle(i){
 
 
 function drawBacteria() {
-    for(var i = 0; i < 1; i++){
+    for(var i = 0; i < 10; i++){
         console.log("Starting circle "+i);
         drawBacteriaCircle(i);   
     }
@@ -214,11 +214,12 @@ function animateBacteria(){
 function getRandomLoc(){
     var rand = Math.floor(20 * Math.random()) / 20.0;
 	var angle = (rand*Math.PI*2);
-	var coord = [2];
+	var coord = [3];
 
 	coord[0] = canvas.width / 2 + canvas.width * 0.8/2 * Math.cos(-angle);
 	console.log(coord[0]);
 	coord[1] = canvas.height / 2 + canvas.height * 0.8/2 * Math.sin(-angle);
+	coord[2] = (canvas.height / 2 + canvas.height * 0.8/2 * Math.sin(angle));
 	return coord;
 }
 
@@ -244,19 +245,13 @@ var canvasLeft = canvas.offsetLeft, canvasTop = canvas.offsetTop;
 canvas.addEventListener('click', function(event){
 	var x = event.pageX - canvas.getBoundingClientRect().left;
 	var y = event.pageY - canvas.getBoundingClientRect().top;
-    
-    // This is for testing - it kills circle 0 if you click anywhere. We'll need to get some proper click detection going, then we should be set.
-    // - Zack
-    //circleAlive[0] = false;
-	console.log(x+" "+y);
-	console.log(circleCoords[0][0]+" "+(circleCoords[0][1]));
 	
 	for(var i = 0; i < 10; i++)
 	{
 		//x-circlex
 		var dx = x - circleCoords[i][0];
 		//y-circley
-		var dy = y - circleCoords[i][1];
+		var dy = y - circleCoords[i][2];
 		var d = Math.sqrt(dx*dx + dy*dy);
 		if(d <= circleRadius && circleAlive[i] == true)
 		{
