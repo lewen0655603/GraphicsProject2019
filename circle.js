@@ -243,11 +243,13 @@ function animateBacteria(){
                     
                     if (circleRadius[i] >= circleRadius[j]){
                         circleAlive[j] = false;
-                        circleRadius[i] += circleRadius[j]/5;
+                        //circleRadius[i] += circleRadius[j]/5;
+                        circleRadius[i] = Math.sqrt(circleRadius[i] * circleRadius[i] + circleRadius[j] * circleRadius[j])
                     }   
                     else{
                         circleAlive[i] = false;
-                        circleRadius[j] += circleRadius[i]/5;
+                        //circleRadius[j] += circleRadius[i]/5;
+                        circleRadius[j] = Math.sqrt(circleRadius[i] * circleRadius[i] + circleRadius[j] * circleRadius[j])
                     }
 				}
 			}
@@ -290,8 +292,8 @@ function checkIntersection(firstCircle, secondCircle, firstRadius, secondRadius)
 {
 	var dx = circleCoords[firstCircle][0] - circleCoords[secondCircle][0];
 	var dy = circleCoords[firstCircle][2] - circleCoords[secondCircle][2];
-	//if(Math.sqrt((dx*dx)+(dy*dy)) <= (2*circleRadius))
-    if(Math.abs(dx) <= (firstRadius + secondRadius)/2 && Math.abs(dy) <= (firstRadius + secondRadius)/2)
+    //if(Math.abs(dx) <= (firstRadius + secondRadius)/2 && Math.abs(dy) <= (firstRadius + secondRadius)/2)
+	if ((dx * dx) + (dy * dy) <= (firstRadius + secondRadius) * (firstRadius + secondRadius)/4)
 	{
 		return true;
 	}
