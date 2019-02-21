@@ -6,8 +6,13 @@ var width = canvas.getAttribute("width"), height = canvas.getAttribute("height")
 var shaders = [];
 var circleColours = [];
 var circleCoords = [];
-var circleRadius = 10;
+var circleRadius = [];
 var circleAlive = [];
+
+var clickAnimationFrame;
+var clickAnimationX;
+var clickAnimationY;
+var clickAnimationRadius;
 
 //all possible colours to randomly choose from
 /*var colours = [
@@ -146,7 +151,7 @@ gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 for(var i = 0; i < 10; i++){
     circleColours[i] = getRandomColour(0.2, 0.8);
     circleCoords[i] = getRandomLoc();
-    //circleRadius[i] = 100;
+    circleRadius[i] = i * 10;
     shaders[i] = createShaders(circleColours[i]);
     circleAlive[i] = true;
 	//drawBacteria(i);
@@ -171,10 +176,10 @@ function drawBacteriaCircle(i){
     
     gl.useProgram(shaders[i]);
      
-	gl.viewport(circleCoords[i][0]-circleRadius/2,
-                circleCoords[i][1]-circleRadius/2, 
-                circleRadius,
-                circleRadius);
+	gl.viewport(circleCoords[i][0]-circleRadius[i]/2,
+                circleCoords[i][1]-circleRadius[i]/2, 
+                circleRadius[i],
+                circleRadius[i]);
 
 	gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
 }
@@ -189,20 +194,38 @@ function drawBacteria() {
 }
 
 function animateBacteria(){
-    circleRadius += 0.2;
+    //circleRadius += 0.2;
     
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
+    if (clickAnimationFrame > 0){
+        clickAnimationRadius = 50 - clickAnimationFrame
+        
+        gl.useProgram(createShaders([1, 0, 0, clickAnimationFrame/50]));
+        
+        gl.viewport(
+            clickAnimationX - clickAnimationRadius/2,
+            clickAnimationY - clickAnimationRadius/2,
+            clickAnimationRadius,
+            clickAnimationRadius)
+        
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
+        
+        clickAnimationFrame--;
+    }
+    
     for(var i = 0; i < 10; i++){
         if (circleAlive[i] == true){
+            
+            circleRadius[i] += 0.2;
 
             gl.useProgram(shaders[i]);
 
             gl.viewport(
-                circleCoords[i][0]-circleRadius/2,
-                circleCoords[i][1]- circleRadius/2, 
-                circleRadius,
-                circleRadius);
+                circleCoords[i][0]-circleRadius[i]/2,
+                circleCoords[i][1]- circleRadius[i]/2, 
+                circleRadius[i],
+                circleRadius[i]);
                 
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
         }
@@ -214,9 +237,18 @@ function animateBacteria(){
 		{
 			if((circleAlive[i]==true&&circleAlive[j]==true)&& (i != j))
 			{
-				if(checkIntersection(i, j))
+				if(checkIntersection(i, j, circleRadius[i], circleRadius[j]))
 				{
 					console.log("Circle "+(j)+" and Circle "+i+" are intersecting");
+                    
+                    if (circleRadius[i] >= circleRadius[j]){
+                        circleAlive[j] = false;
+                        circleRadius[i] += circleRadius[j]/5;
+                    }   
+                    else{
+                        circleAlive[i] = false;
+                        circleRadius[j] += circleRadius[i]/5;
+                    }
 				}
 			}
 		}
@@ -254,11 +286,12 @@ function getRandomColour(min, max)
     return colour;
 }
 
-function checkIntersection(firstCircle, secondCircle)
+function checkIntersection(firstCircle, secondCircle, firstRadius, secondRadius)
 {
 	var dx = circleCoords[firstCircle][0] - circleCoords[secondCircle][0];
 	var dy = circleCoords[firstCircle][2] - circleCoords[secondCircle][2];
-	if(Math.sqrt((dx*dx)+(dy*dy)) <= (2*circleRadius))
+	//if(Math.sqrt((dx*dx)+(dy*dy)) <= (2*circleRadius))
+    if(Math.abs(dx) <= (firstRadius + secondRadius)/2 && Math.abs(dy) <= (firstRadius + secondRadius)/2)
 	{
 		return true;
 	}
@@ -281,9 +314,13 @@ canvas.addEventListener('click', function(event){
 		//y-circley
 		var dy = y - circleCoords[i][2];
 		var d = Math.sqrt(dx*dx + dy*dy);
-		if(d <= circleRadius && circleAlive[i] == true)
+		if(d <= circleRadius[i]/2 && circleAlive[i] == true)
 		{
 			circleAlive[i] = false;
+            
+            clickAnimationFrame = 50;
+            clickAnimationX = x;
+            clickAnimationY = Math.abs(canvas.getBoundingClientRect().bottom - y);
 		}
 	}
 });
