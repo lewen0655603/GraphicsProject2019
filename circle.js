@@ -3,6 +3,12 @@ var gl = canvas.getContext('experimental-webgl');
 		 
 var width = canvas.getAttribute("width"), height = canvas.getAttribute("height");
 
+var shaders = [];
+var circleColours = [];
+var circleCoords = [];
+var circleRadius = 10;
+var circleAlive = [];
+
 //all possible colours to randomly choose from
 /*var colours = [
 	[0,0,1,1],
@@ -55,6 +61,7 @@ gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
 
 // Unbind the buffer
 gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
 
 /*=================== Shaders ====================*/
 
@@ -119,7 +126,11 @@ function createShaders(colour){
 
     // Enable the attribute
     gl.enableVertexAttribArray(coord);
+    
+    
+    return shaderProgram;
 }
+
 
 
 
@@ -133,29 +144,71 @@ gl.enable(gl.DEPTH_TEST);
 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 		
 for(var i = 0; i < 10; i++){
-	drawBacteria();
+    circleColours[i] = getRandomColour(0.2, 0.8);
+    circleCoords[i] = getRandomLoc();
+    //circleRadius[i] = 100;
+    shaders[i] = createShaders(circleColours[i]);
+    circleAlive[i] = true;
+	//drawBacteria(i);
 }
 
+shaders[10] = createShaders([0, 0, 0, 0]);
+
+drawBacteria();
 drawMainCircle();
 		 
-		 
+		  
 function drawMainCircle(){
-	createShaders([0,0,0,0]);
+    gl.useProgram(shaders[10]);
 	// Set the view port
 	gl.viewport(canvas.width * 0.1, canvas.height * 0.1, canvas.width * 0.8, canvas.height * 0.8);
+    
+	gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
+}
+
+function drawBacteriaCircle(i){
+    console.log("Drawing circle "+i);
+    
+    gl.useProgram(shaders[i]);
+     
+	gl.viewport(circleCoords[i][0]-circleRadius/2,
+                circleCoords[i][1]-circleRadius/2, 
+                circleRadius,
+                circleRadius);
 
 	gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
 }
-		 
-function drawBacteria() {
-	//var randomColour = Math.floor(Math.random() * 4);
-	createShaders(getRandomColour(0.2, 0.8));
-	var coord = getRandomLoc();
-	console.log(coord[1]);
-				
-	gl.viewport(coord[0]-50,coord[1]-50,100,100);
 
-	gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
+
+function drawBacteria() {
+    for(var i = 0; i < 1; i++){
+        console.log("Starting circle "+i);
+        drawBacteriaCircle(i);   
+    }
+    animateBacteria();
+}
+
+function animateBacteria(){
+    circleRadius += 0.2;
+    
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    
+    for(var i = 0; i < 10; i++){
+        if (circleAlive[i] == true){
+
+            gl.useProgram(shaders[i]);
+
+            gl.viewport(
+                circleCoords[i][0]-circleRadius/2,
+                circleCoords[i][1]- circleRadius/2, 
+                circleRadius,
+                circleRadius);
+                
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
+        }
+    }
+    drawMainCircle();
+    requestAnimationFrame(animateBacteria);
 }
 		 
 function getRandomLoc(){
@@ -189,8 +242,25 @@ function getRandomColour(min, max)
 var canvasLeft = canvas.offsetLeft, canvasTop = canvas.offsetTop;
 
 canvas.addEventListener('click', function(event){
-	var x = event.pageX - canvasLeft;
-	var y = event.pageY - canvasTop;
+	var x = event.pageX - canvas.getBoundingClientRect().left;
+	var y = event.pageY - canvas.getBoundingClientRect().top;
+    
+    // This is for testing - it kills circle 0 if you click anywhere. We'll need to get some proper click detection going, then we should be set.
+    // - Zack
+    //circleAlive[0] = false;
+	console.log(x+" "+y);
+	console.log(circleCoords[0][0]+" "+(circleCoords[0][1]));
 	
-	console.log(x + " "+ y);
+	for(var i = 0; i < 10; i++)
+	{
+		//x-circlex
+		var dx = x - circleCoords[i][0];
+		//y-circley
+		var dy = y - circleCoords[i][1];
+		var d = Math.sqrt(dx*dx + dy*dy);
+		if(d <= circleRadius && circleAlive[i] == true)
+		{
+			circleAlive[i] = false;
+		}
+	}
 });
