@@ -6,7 +6,7 @@ var width = canvas.getAttribute("width"), height = canvas.getAttribute("height")
 var shaders = [];
 var circleColours = [];
 var circleCoords = [];
-var circleRadius = 100;
+var circleRadius = 10;
 var circleAlive = [];
 
 //all possible colours to randomly choose from
@@ -207,6 +207,20 @@ function animateBacteria(){
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
         }
     }
+	
+	for(var i = 0; i < 10; i++)
+	{
+		for(var j = 0; j < 10; j++)
+		{
+			if((circleAlive[i]==true&&circleAlive[j]==true)&& (i != j))
+			{
+				if(checkIntersection(i, j))
+				{
+					console.log("Circle "+(j)+" and Circle "+i+" are intersecting");
+				}
+			}
+		}
+	}
     drawMainCircle();
     requestAnimationFrame(animateBacteria);
 }
@@ -238,6 +252,20 @@ function getRandomColour(min, max)
     console.log(colour);
 
     return colour;
+}
+
+function checkIntersection(firstCircle, secondCircle)
+{
+	var dx = circleCoords[firstCircle][0] - circleCoords[secondCircle][0];
+	var dy = circleCoords[firstCircle][2] - circleCoords[secondCircle][2];
+	if(Math.sqrt((dx*dx)+(dy*dy)) <= (2*circleRadius))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 var canvasLeft = canvas.offsetLeft, canvasTop = canvas.offsetTop;
