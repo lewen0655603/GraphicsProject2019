@@ -224,8 +224,8 @@ function animateBacteria(){
     for(var i = 0; i < 10; i++){
         if (circleAlive[i] == true){
             
-            //if (circleRadius[i] < maxSize) circleRadius[i] += 0.2;
-            circleRadius[i] += 0.2;
+            if (circleRadius[i] < maxSize) circleRadius[i] += 0.2;
+            //circleRadius[i] += 0.2;
 
             gl.useProgram(shaders[i]);
 
@@ -377,8 +377,7 @@ canvas.addEventListener('click', function(event){
 		//y-circley
 		var dy = y - circleCoords[i][2];
 		var d = Math.sqrt(dx*dx + dy*dy);
-		//if(d <= circleRadius[i]/2 && circleAlive[i] == true && circleRadius[i]<maxSize)
-        if(d <= circleRadius[i]/2 && circleAlive[i] == true)
+		if(d <= circleRadius[i]/2 && circleAlive[i] == true && circleRadius[i]<maxSize)
 		{
 			circleAlive[i] = false;
             
