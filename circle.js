@@ -9,7 +9,7 @@ var circleCoords = [];
 var circleRadius = [];
 var circleAlive = [];
 
-var clickAnimationFrame;
+var clickAnimationFrame = -1;
 var clickAnimationX;
 var clickAnimationY;
 var clickAnimationRadius;
@@ -204,26 +204,28 @@ function animateBacteria(){
     
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
-    if (clickAnimationFrame > 0){
-        clickAnimationRadius = 50 - clickAnimationFrame
-        
-        gl.useProgram(createShaders([1, 0, 0, clickAnimationFrame/50]));
-        
-        gl.viewport(
-            clickAnimationX - clickAnimationRadius/2,
-            clickAnimationY - clickAnimationRadius/2,
-            clickAnimationRadius,
-            clickAnimationRadius)
-        
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
-        
-        clickAnimationFrame--;
+    for (i = 0; i < 10; i++){
+        //check intersection for clicking
+        var dx = clickAnimationX - circleCoords[i][0];
+        var dy = (height - clickAnimationY) - circleCoords[i][2];
+        if (circleAlive[i] && 
+            Math.abs(dx) <= (clickAnimationRadius + circleRadius[i])/2 && 
+            Math.abs(dy) <= (clickAnimationRadius + circleRadius[i])/2) 
+        {
+                console.log("Poison intersecting with circle "+i);
+                circleAlive[i] = false;
+                if (timer < 1000){
+                    score += 1000 - timer;
+                    console.log(1000 - timer +" points added from poison collision. New score is: "+score);
+                }
+        }
     }
     
     for(var i = 0; i < 10; i++){
         if (circleAlive[i] == true){
             
             if (circleRadius[i] < maxSize) circleRadius[i] += 0.2;
+            //circleRadius[i] += 0.2;
 
             gl.useProgram(shaders[i]);
 
@@ -240,8 +242,8 @@ function animateBacteria(){
 	for(var i = 0; i < 9; i++)
 	{
 	    if (circleAlive[i])
-		for(var j = i+1; j < 10; j++)
-		{
+		  for(var j = i+1; j < 10; j++)
+		  {
 			    if(circleAlive[j]&&checkIntersection(i, j, circleRadius[i], circleRadius[j]))
 				{
 					console.log("Circle "+(j)+" and Circle "+i+" are intersecting");
@@ -258,10 +260,26 @@ function animateBacteria(){
                         circleRadius[j] = Math.sqrt(circleRadius[i] * circleRadius[i] + circleRadius[j] * circleRadius[j]);
                         console.log("Circle "+j+" consumed circle "+i);
                     }
-				}
-			
-		}
+                }		
+		  }
 	}
+    
+    if (clickAnimationFrame >= 0){
+        clickAnimationRadius = clickAnimationFrame
+        
+        gl.useProgram(createShaders([1, 0, 1, 1]));
+        
+        gl.viewport(
+            clickAnimationX - clickAnimationRadius/2,
+            clickAnimationY - clickAnimationRadius/2,
+            clickAnimationRadius,
+            clickAnimationRadius)
+        
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
+        
+        clickAnimationFrame++;
+    }
+    
     drawMainCircle();
     
     if (isGameOver() == false)
@@ -346,6 +364,11 @@ var canvasLeft = canvas.offsetLeft, canvasTop = canvas.offsetTop;
 canvas.addEventListener('click', function(event){
 	var x = event.pageX - canvas.getBoundingClientRect().left;
 	var y = event.pageY - canvas.getBoundingClientRect().top;
+    
+    clickAnimationFrame = 0;
+    clickAnimationX = x;
+    //clickAnimationY = Math.abs(canvas.getBoundingClientRect().bottom - y);
+    clickAnimationY = height-y;
 	
 	for(var i = 0; i < 10; i++)
 	{
@@ -358,14 +381,9 @@ canvas.addEventListener('click', function(event){
 		{
 			circleAlive[i] = false;
             
-            clickAnimationFrame = 50;
-            clickAnimationX = x;
-		    //clickAnimationY = Math.abs(canvas.getBoundingClientRect().bottom - y);
-            clickAnimationY = height-y;
-            
             if (timer < 1000){
                 score += 1000 - timer;
-                console.log(1000 - timer +" points added. New score is: "+score);
+                console.log(1000 - timer +" points added from click detection. New score is: "+score);
             }
 		}
 	}
