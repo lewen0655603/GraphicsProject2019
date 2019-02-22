@@ -1,6 +1,6 @@
 var canvas = document.getElementById('my_Canvas');
 var gl = canvas.getContext('experimental-webgl');
-		 
+
 var width = canvas.getAttribute("width"), height = canvas.getAttribute("height");
 
 var shaders = [];
@@ -140,7 +140,7 @@ function createShaders(colour){
 
 
 // Clear the canvas
-gl.clearColor(0.5, 0.5, 0.5, 0.9);
+gl.clearColor(0.5, 0.5, 0.5, 1);
 
 // Enable the depth test
 gl.enable(gl.DEPTH_TEST);
@@ -157,7 +157,7 @@ for(var i = 0; i < 10; i++){
 	//drawBacteria(i);
 }
 
-shaders[10] = createShaders([0, 0, 0, 0]);
+shaders[10] = createShaders([1, 1, 1, 1]);
 
 drawBacteria();
 drawMainCircle();
