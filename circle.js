@@ -249,19 +249,52 @@ function animateBacteria(){
                     if (circleRadius[i] >= circleRadius[j]){
                         circleAlive[j] = false;
                         //circleRadius[i] += circleRadius[j]/5;
-                        circleRadius[i] = Math.sqrt(circleRadius[i] * circleRadius[i] + circleRadius[j] * circleRadius[j])
+                        circleRadius[i] = Math.sqrt(circleRadius[i] * circleRadius[i] + circleRadius[j] * circleRadius[j]);
+                        console.log("Circle "+i+" consumed circle "+j);
                     }   
                     else{
                         circleAlive[i] = false;
                         //circleRadius[j] += circleRadius[i]/5;
-                        circleRadius[j] = Math.sqrt(circleRadius[i] * circleRadius[i] + circleRadius[j] * circleRadius[j])
+                        circleRadius[j] = Math.sqrt(circleRadius[i] * circleRadius[i] + circleRadius[j] * circleRadius[j]);
+                        console.log("Circle "+j+" consumed circle "+i);
                     }
 				}
 			
 		}
 	}
     drawMainCircle();
-    requestAnimationFrame(animateBacteria);
+    
+    if (isGameOver() == false)
+        requestAnimationFrame(animateBacteria);
+}
+
+function isGameOver(){
+    var gameOver = false;
+    var anyAlive = false;
+    var tooBigCount = 0;
+    
+    for (var i = 0; i < 10; i++){
+        if (circleAlive[i] == true){
+            anyAlive = true;
+        }
+        
+        if (circleRadius[i] >= 200){
+            tooBigCount ++;
+            console.log("Circle "+i+" is too big.");
+        }
+    }
+    
+    if (anyAlive == false){
+        console.log("You win! Final score is: "+score);
+        gameOver = true;
+    }
+    
+    if (tooBigCount >= 2){
+        console.log("You lose... Final score is: "+score);
+        gameOver = true;
+    }
+    
+    return gameOver;
 }
 		 
 function getRandomLoc(){
