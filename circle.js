@@ -321,7 +321,8 @@ canvas.addEventListener('click', function(event){
             
             clickAnimationFrame = 50;
             clickAnimationX = x;
-            clickAnimationY = Math.abs(canvas.getBoundingClientRect().bottom - y);
+		    //clickAnimationY = Math.abs(canvas.getBoundingClientRect().bottom - y);
+            clickAnimationY = height-y;
 		}
 	}
 });
