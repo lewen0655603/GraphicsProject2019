@@ -16,6 +16,9 @@ var clickAnimationRadius;
 
 var maxSize = 200;
 
+var score = 0;
+var timer = 0;
+
 //all possible colours to randomly choose from
 /*var colours = [
 	[0,0,1,1],
@@ -197,6 +200,7 @@ function drawBacteria() {
 
 function animateBacteria(){
     //circleRadius += 0.2;
+    timer++;
     
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
@@ -325,6 +329,11 @@ canvas.addEventListener('click', function(event){
             clickAnimationX = x;
 		    //clickAnimationY = Math.abs(canvas.getBoundingClientRect().bottom - y);
             clickAnimationY = height-y;
+            
+            if (timer < 1000){
+                score += 1000 - timer;
+                console.log(1000 - timer +" points added. New score is: "+score);
+            }
 		}
 	}
 });
