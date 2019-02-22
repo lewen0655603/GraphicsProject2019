@@ -208,9 +208,7 @@ function animateBacteria(){
         //check intersection for clicking
         var dx = clickAnimationX - circleCoords[i][0];
         var dy = (height - clickAnimationY) - circleCoords[i][2];
-        if (circleAlive[i] && 
-            Math.abs(dx) <= (clickAnimationRadius + circleRadius[i])/2 && 
-            Math.abs(dy) <= (clickAnimationRadius + circleRadius[i])/2) 
+        if (circleAlive[i] && ((dx * dx) + (dy * dy) <= (circleRadius[i] + clickAnimationRadius) * (circleRadius[i] + clickAnimationRadius) / 4))
         {
                 console.log("Poison intersecting with circle "+i);
                 circleAlive[i] = false;
@@ -267,7 +265,7 @@ function animateBacteria(){
     if (clickAnimationFrame >= 0){
         clickAnimationRadius = clickAnimationFrame
         
-        gl.useProgram(createShaders([1, 0, 1, 1]));
+        gl.useProgram(createShaders([0.2, 1, 0.2, 1]));
         
         gl.viewport(
             clickAnimationX - clickAnimationRadius/2,
@@ -349,14 +347,7 @@ function checkIntersection(firstCircle, secondCircle, firstRadius, secondRadius)
 	var dx = circleCoords[firstCircle][0] - circleCoords[secondCircle][0];
 	var dy = circleCoords[firstCircle][2] - circleCoords[secondCircle][2];
     //if(Math.abs(dx) <= (firstRadius + secondRadius)/2 && Math.abs(dy) <= (firstRadius + secondRadius)/2)
-	if ((dx * dx) + (dy * dy) <= (firstRadius + secondRadius) * (firstRadius + secondRadius)/4)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+	return ((dx * dx) + (dy * dy) <= (firstRadius + secondRadius) * (firstRadius + secondRadius)/4)
 }
 
 var canvasLeft = canvas.offsetLeft, canvasTop = canvas.offsetTop;
