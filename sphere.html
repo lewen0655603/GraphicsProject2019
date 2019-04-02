@@ -131,14 +131,15 @@
            '}';
 
         var fragCode = 'precision mediump float;' +
-           'uniform vec4 BacPosition;' +
-           'uniform float BacSize;' +
+           'uniform vec4 BacPosition[3];' +
+           'uniform float BacSize[3];' +
            'varying vec3 vColor;' +
            'varying vec4 vPosition;' +
            'void main(void) {' +
               'gl_FragColor = vec4(vColor, 1.);' +
-              'if(dot(vPosition, BacPosition) <= BacSize){' +
-              'gl_FragColor = vec4(0.75*vColor, 1.);}' +
+              'for (int i = 0; i < 3; i ++) {' +
+              'if(distance(vPosition, BacPosition[i]) <= BacSize[i]){' +
+              'gl_FragColor = vec4(0.75*vColor, 1.);}}' +
            '}';
 
         var vertShader = gl.createShader(gl.VERTEX_SHADER);
@@ -160,7 +161,6 @@
         var _Mmatrix = gl.getUniformLocation(shaderprogram, "Mmatrix");
         //var _BacColor = gl.getUniformLocation(shaderprogram, "BacColor");
         var _BacPosition = gl.getUniformLocation(shaderprogram, "BacPosition");
-        //var _BacPosition1 = gl.getUniformLocation(shaderprogram, "BacPosition1");
         var _BacSize = gl.getUniformLocation(shaderprogram, "BacSize");
 
         gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
@@ -266,7 +266,10 @@
         var THETA = 0,
         PHI = 0;
         var time_old = 0;
-        var bSize = 0;
+        //var bSize = 0;
+
+        var bSize = [0, 0, 0];
+        var bPos = [1, 0, 0, 1,  0, 1.2, 0, 1,  0, 0, 1.4, 1];
 
         var animate = function (time) {
             var dt = time - time_old;
@@ -276,7 +279,12 @@
                 THETA += dX, PHI += dY;
             }
 
-            bSize += 0.0001
+            for(i = 0; i < bSize.length; i++)
+            {
+                bSize[i] += 0.0005
+                //console.log(bSize);
+            }
+            
 
             //set model matrix to I4
 
@@ -308,10 +316,8 @@
             gl.uniformMatrix4fv(_Pmatrix, false, proj_matrix);
             gl.uniformMatrix4fv(_Vmatrix, false, view_matrix);
             gl.uniformMatrix4fv(_Mmatrix, false, mo_matrix);
-            gl.uniform4fv(_BacPosition, [1, 0, 0, 1]);
-            //gl.uniform4fv(_BacPosition1, [1, 0, 0, 1]);
-            //gl.uniform3fv(_BacColor, [0.5, 0, 0]);
-            gl.uniform1f(_BacSize, bSize);
+            gl.uniform4fv(_BacPosition, bPos);
+            gl.uniform1fv(_BacSize, bSize);
 
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
             gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
