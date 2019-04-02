@@ -9,6 +9,11 @@
         gl = canvas.getContext('experimental-webgl');
 
         /*========== Defining and storing the geometry ==========*/
+
+        var bSize = [0, 0, 0];
+        var bPos = [1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 1];
+        var bCol = [0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5];
+
         var d = Math.sqrt(2.0 / 3.0);
         var r = d / Math.sqrt(2);
         var v1 = [
@@ -61,9 +66,6 @@
                 divide(b, ab, bc, col2, col12, col23, i - 1);
                 divide(c, ca, bc, col3, col31, col23, i - 1);
                 divide(ab, bc, ca, col12, col23, col31, i - 1);
-                //divide(abc, ab, ca, col123, col12, col31, i - 1);
-                //divide(abc, ab, bc, col123, col12, col23, i - 1);
-                //divide(abc, ca, bc, col123, col31, col23, i - 1);
             }
         }
 
@@ -75,14 +77,6 @@
             ab = [ab[0] / length, ab[1] / length, ab[2] / length];
             return ab;
         }
-
-       /* function avPoint3(a, b, c) {
-            abc = [(a[0] + b[0] + c[0]) / 2.0, (a[1] + b[1] + c[1]) / 2.0, (a[2] + b[2] + c[2]) / 2.0];
-            length = Math.sqrt(abc[0] * abc[0] + abc[1] * abc[1] + abc[2] * abc[2]);
-            //length = 1;
-            abc = [abc[0] / length, abc[1] / length, abc[2] / length];
-            return abc;
-        }*/
         
         function avColor2(col1, col2)
         {
@@ -91,13 +85,6 @@
             col12 = [col12[0] / max, col12[1] / max, col12[2] / max];
             return col12;
         }
-
-        /*function avColor3(col1, col2, col3) {
-            col123 = [(col1[0] + col2[0] + col3[0]), (col1[1] + col2[1] + col3[1]), (col1[2] + col2[2] + col3[2])]
-            max = Math.max(col123[0], col123[1], col123[2]);
-            col123 = [col123[0] / max, col123[1] / max, col123[2] / max];
-            return col123;
-        }*/
 
         // Create and store data into vertex buffer
         var vertex_buffer = gl.createBuffer();
@@ -132,14 +119,18 @@
 
         var fragCode = 'precision mediump float;' +
            'uniform vec4 BacPosition[3];' +
+           'uniform vec3 BacColor[3];' +
            'uniform float BacSize[3];' +
            'varying vec3 vColor;' +
            'varying vec4 vPosition;' +
            'void main(void) {' +
-              'gl_FragColor = vec4(vColor, 1.);' +
+           'gl_FragColor = vec4(vColor, 1.);' +
               'for (int i = 0; i < 3; i ++) {' +
-              'if(distance(vPosition, BacPosition[i]) <= BacSize[i]){' +
-              'gl_FragColor = vec4(0.75*vColor, 1.);}}' +
+                 'if(distance(vPosition, BacPosition[i]) <= BacSize[i])' +
+                 '{'+
+                   'gl_FragColor = vec4(BacColor[i], 1.);' +
+                 '}'+
+              '}' +
            '}';
 
         var vertShader = gl.createShader(gl.VERTEX_SHADER);
@@ -159,7 +150,7 @@
         var _Pmatrix = gl.getUniformLocation(shaderprogram, "Pmatrix");
         var _Vmatrix = gl.getUniformLocation(shaderprogram, "Vmatrix");
         var _Mmatrix = gl.getUniformLocation(shaderprogram, "Mmatrix");
-        //var _BacColor = gl.getUniformLocation(shaderprogram, "BacColor");
+        var _BacColor = gl.getUniformLocation(shaderprogram, "BacColor");
         var _BacPosition = gl.getUniformLocation(shaderprogram, "BacPosition");
         var _BacSize = gl.getUniformLocation(shaderprogram, "BacSize");
 
@@ -179,17 +170,11 @@
         function get_projection(angle, a, zMin, zMax) {
             var ang = Math.tan((angle * .5) * Math.PI / 180);//angle*.5
             return [
-               0.5/ang, 0 , 0, 0,
-               0, 0.5*a/ang, 0, 0,
+               1/ang, 0 , 0, 0,
+               0, 1*a/ang, 0, 0,
                0, 0, -(zMax+zMin)/(zMax-zMin), -1,
                0, 0, (-2*zMax*zMin)/(zMax-zMin), 0
             ];
-            /*return [
-              1, 0, 0, 0,
-              0, 1, 0, 0,
-              0, 0, 0, -1,
-              0, 0, -1, 0
-            ];*/
         }
 
         var proj_matrix = get_projection(40, canvas.width / canvas.height, 1, 100);
@@ -230,6 +215,35 @@
         canvas.addEventListener("mouseup", mouseUp, false);
         canvas.addEventListener("mouseout", mouseUp, false);
         canvas.addEventListener("mousemove", mouseMove, false);
+        canvas.addEventListener("click", function () {
+            var coords = [0,0,0];
+            coords[0] = event.pageX - canvas.getBoundingClientRect().left;
+            coords[1] = -event.pageY + canvas.getBoundingClientRect().bottom;
+            console.log(coords);
+            var pixels = new Uint8Array(4);
+            
+            requestAnimationFrame(function () {
+                gl.readPixels(coords[0], coords[1], 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+                console.log(pixels);
+            });
+            /*coords[0] = (coords[0] * 2) / canvas.width - 1;
+            coords[1] = (coords[1] * -2) / canvas.height + 1;
+            if (coords[0] * coords[0] + coords[1] * coords[1] < 1) {
+                coords[2] = -Math.sqrt(1 - coords[0] * coords[0] - coords[1] * coords[1]);
+                console.log(coords);
+                console.log(bPos);
+                for (i = 0; i < bSize.length; i++) {
+                    var dist2 = (coords[0] + bPos[i*4]) * (coords[0] + bPos[i*4]) +
+                        (coords[1] + bPos[i*4+1]) * (coords[1] + bPos[i*4+1]) +
+                        (coords[2] + bPos[i*4+2]) * (coords[2] + bPos[i*4+2]);
+                    console.log(dist2 + " " + bSize[i] * bSize[i]);
+                    if (dist2 < bSize[i])
+                    {
+                        //console.log(bSize[i]);
+                    }
+                }
+            }*/
+        });
 
         /*=========================rotation================*/
 
@@ -266,10 +280,8 @@
         var THETA = 0,
         PHI = 0;
         var time_old = 0;
-        //var bSize = 0;
 
-        var bSize = [0, 0, 0];
-        var bPos = [1, 0, 0, 1,  0, 1.2, 0, 1,  0, 0, 1.4, 1];
+        
 
         var animate = function (time) {
             var dt = time - time_old;
@@ -281,7 +293,7 @@
 
             for(i = 0; i < bSize.length; i++)
             {
-                bSize[i] += 0.0005
+                bSize[i] += 0.00025
                 //console.log(bSize);
             }
             
@@ -308,7 +320,7 @@
 
             // gl.depthFunc(gl.LEQUAL);
 
-            gl.clearColor(1, 1, 1, 1);
+            gl.clearColor(0.9, 0.9, 0.9, 1);
             gl.clearDepth(1.0);
             gl.viewport(0.0, 0.0, canvas.width, canvas.height);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -317,6 +329,7 @@
             gl.uniformMatrix4fv(_Vmatrix, false, view_matrix);
             gl.uniformMatrix4fv(_Mmatrix, false, mo_matrix);
             gl.uniform4fv(_BacPosition, bPos);
+            gl.uniform3fv(_BacColor, bCol);
             gl.uniform1fv(_BacSize, bSize);
 
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
