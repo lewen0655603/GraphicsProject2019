@@ -10,9 +10,10 @@
 
         /*========== Defining and storing the geometry ==========*/
 
-        var bSize = [0, 0, 0];
-        var bPos = [1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 1];
-        var bCol = [0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5];
+        var bSize = [0, 0, 0];                           //each bacteria size
+        var bPos = [1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 1]; //x,y,z for each bacteria.
+        var bCol = [0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5];    //r, g, b for each bacteria.
+        var bActive = [true, true, true];                //Whether each bacteria is alive or dead.
 
         var d = Math.sqrt(2.0 / 3.0);
         var r = d / Math.sqrt(2);
@@ -118,15 +119,16 @@
            '}';
 
         var fragCode = 'precision mediump float;' +
-           'uniform vec4 BacPosition[3];' +
-           'uniform vec3 BacColor[3];' +
-           'uniform float BacSize[3];' +
+           'uniform vec4 BacPosition[3];' + //hardcode
+           'uniform vec3 BacColor[3];' + //hardcode
+           'uniform float BacSize[3];' + //hardcode
+           'uniform bool BacActive[3];' + //hardcode
            'varying vec3 vColor;' +
            'varying vec4 vPosition;' +
            'void main(void) {' +
            'gl_FragColor = vec4(vColor, 1.);' +
-              'for (int i = 0; i < 3; i ++) {' +
-                 'if(distance(vPosition, BacPosition[i]) <= BacSize[i])' +
+              'for (int i = 0; i < 3; i ++) {' + //hardcode
+                 'if(BacActive[i] && distance(vPosition, BacPosition[i]) <= BacSize[i])' +
                  '{'+
                    'gl_FragColor = vec4(BacColor[i], 1.);' +
                  '}'+
@@ -153,6 +155,7 @@
         var _BacColor = gl.getUniformLocation(shaderprogram, "BacColor");
         var _BacPosition = gl.getUniformLocation(shaderprogram, "BacPosition");
         var _BacSize = gl.getUniformLocation(shaderprogram, "BacSize");
+        var _BacActive = gl.getUniformLocation(shaderprogram, "BacActive");
 
         gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
         var _position = gl.getAttribLocation(shaderprogram, "position");
@@ -219,30 +222,20 @@
             var coords = [0,0,0];
             coords[0] = event.pageX - canvas.getBoundingClientRect().left;
             coords[1] = -event.pageY + canvas.getBoundingClientRect().bottom;
-            console.log(coords);
+            //console.log(coords);
             var pixels = new Uint8Array(4);
             
             requestAnimationFrame(function () {
                 gl.readPixels(coords[0], coords[1], 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-                console.log(pixels);
-            });
-            /*coords[0] = (coords[0] * 2) / canvas.width - 1;
-            coords[1] = (coords[1] * -2) / canvas.height + 1;
-            if (coords[0] * coords[0] + coords[1] * coords[1] < 1) {
-                coords[2] = -Math.sqrt(1 - coords[0] * coords[0] - coords[1] * coords[1]);
-                console.log(coords);
-                console.log(bPos);
                 for (i = 0; i < bSize.length; i++) {
-                    var dist2 = (coords[0] + bPos[i*4]) * (coords[0] + bPos[i*4]) +
-                        (coords[1] + bPos[i*4+1]) * (coords[1] + bPos[i*4+1]) +
-                        (coords[2] + bPos[i*4+2]) * (coords[2] + bPos[i*4+2]);
-                    console.log(dist2 + " " + bSize[i] * bSize[i]);
-                    if (dist2 < bSize[i])
+                    if (bActive[i] && pixels[0]/256 == bCol[i*3] && pixels[1]/256 == bCol[i*3+1] && pixels[2]/256 == bCol[i*3+2])
                     {
-                        //console.log(bSize[i]);
+                        bActive[i] = false;
+                        console.log(bActive);
                     }
                 }
-            }*/
+                
+            });
         });
 
         /*=========================rotation================*/
@@ -331,6 +324,7 @@
             gl.uniform4fv(_BacPosition, bPos);
             gl.uniform3fv(_BacColor, bCol);
             gl.uniform1fv(_BacSize, bSize);
+            gl.uniform1fv(_BacActive, bActive);
 
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
             gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
