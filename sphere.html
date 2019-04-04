@@ -15,9 +15,9 @@
 		for(var i = 0; i < numBacteria; i++)
 		{
 			// get random x, y, and z coordinates betweeon 0 and 500
-			var x = Math.floor(Math.random() * 500);
-			var y = Math.floor(Math.random() * 500);
-			var z = Math.floor(Math.random() * 500);
+			var x = Math.floor(Math.random() * 500-250);
+			var y = Math.floor(Math.random() * 500-250);
+			var z = Math.floor(Math.random() * 500-250);
 			
 			//get the normalized position of this point
 			var length = Math.sqrt((x*x) + (y*y) + (z*z));
@@ -32,10 +32,11 @@
 			bActive[i] = true;
 			
 			bPos[posCounter] = x;
-			bPos[posCounter+3] = y;
-			bPos[posCounter+6] = z;
+			bPos[posCounter+1] = y;
+			bPos[posCounter + 2] = z;
+			bPos[posCounter + 3] = 1;
 			
-			posCounter = posCounter + 3;
+			posCounter = posCounter + 4;
 			
 			//change this to randomly generate colours
 			
@@ -43,6 +44,10 @@
 			var g = Math.random();
 			var b = Math.random();
 			
+			//var r = Math.floor(Math.random() * 256)/256;
+			//var g = 0.25;
+			//var b = 0.125;
+
 			bCol[colCounter] = r;
 			bCol[colCounter+1] = g;
 			bCol[colCounter+2] = b;
@@ -50,12 +55,12 @@
 			colCounter = colCounter + 3;
 			
 		}
-		console.log(bSize);
-		console.log(bPos);
+		//console.log(bSize);
+		//console.log(bPos);
 		console.log(bCol);
-		console.log(bActive);
+		//console.log(bActive);
         //var bSize = [0, 0, 0];                           //each bacteria size
-        var bPos = [1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 1]; //x,y,z for each bacteria.
+        //var bPos = [1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 1]; //x,y,z for each bacteria.
         //var bCol = [0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5];    //r, g, b for each bacteria.
         //var bActive = [true, true, true];                //Whether each bacteria is alive or dead.
         var d = Math.sqrt(2.0 / 3.0);
@@ -242,7 +247,10 @@
             requestAnimationFrame(function () {
                 gl.readPixels(coords[0], coords[1], 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
                 for (i = 0; i < bSize.length; i++) {
-                    if (bActive[i] && pixels[0]/256 == bCol[i*3] && pixels[1]/256 == bCol[i*3+1] && pixels[2]/256 == bCol[i*3+2])
+                    console.log(pixels[0] + " " + bCol[i * 3])
+                    if (bActive[i] && Math.abs(pixels[0] / 256 - bCol[i * 3]) < 0.01
+                                   && Math.abs(pixels[1] / 256 - bCol[i * 3 + 1]) < 0.01
+                                   && Math.abs(pixels[2] / 256 - bCol[i * 3 + 2] < 0.01))
                     {
                         bActive[i] = false;
                         console.log(bActive);
@@ -313,7 +321,7 @@
             gl.uniformMatrix4fv(_Vmatrix, false, view_matrix);
             gl.uniformMatrix4fv(_Mmatrix, false, mo_matrix);
             gl.uniform4fv(_BacPosition, bPos);
-			console.log(gl.uniform4fv(_BacPosition, bPos));
+			//console.log(gl.uniform4fv(_BacPosition, bPos));
             gl.uniform3fv(_BacColor, bCol);
             gl.uniform1fv(_BacSize, bSize);
             gl.uniform1fv(_BacActive, bActive);
