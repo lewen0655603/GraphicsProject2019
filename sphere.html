@@ -4,12 +4,16 @@
     <canvas width="570" height="570" id="my_Canvas"></canvas>
 
     <script>
+        
+        var score = 0;
+        var timer = 0;
+        
         /*============= Creating a canvas ======================*/
         var canvas = document.getElementById('my_Canvas');
         gl = canvas.getContext('experimental-webgl');
         /*========== Defining and storing the geometry ==========*/
-		//var numBacteria = Math.floor(Math.random() * 10)+3; // gets number of bacteria between 3 and 10
-		var numBacteria = 3;
+		var numBacteria = Math.floor(Math.random() * 10)+3; // gets number of bacteria between 3 and 10
+
 		var bSize = [], bPos = [], bCol = [], bActive = [];
 		var posCounter = 0, colCounter = 0;
 		for(var i = 0; i < numBacteria; i++)
@@ -26,8 +30,6 @@
 			y = y/length;
 			z = z/length;
 			
-			console.log((x*x)+(y*y) +(z*z));
-			
 			bSize[i] = 0;
 			bActive[i] = true;
 			
@@ -37,8 +39,7 @@
 			bPos[posCounter + 3] = 1;
 			
 			posCounter = posCounter + 4;
-			
-			//change this to randomly generate colours
+
 			
 			var r = Math.random();
 			var g = Math.random();
@@ -47,7 +48,6 @@
 			//var r = Math.floor(Math.random() * 256)/256;
 			//var g = 0.25;
 			//var b = 0.125;
-
 			bCol[colCounter] = r;
 			bCol[colCounter+1] = g;
 			bCol[colCounter+2] = b;
@@ -55,10 +55,7 @@
 			colCounter = colCounter + 3;
 			
 		}
-		//console.log(bSize);
-		//console.log(bPos);
-		console.log(bCol);
-		//console.log(bActive);
+
         //var bSize = [0, 0, 0];                           //each bacteria size
         //var bPos = [1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 1]; //x,y,z for each bacteria.
         //var bCol = [0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5];    //r, g, b for each bacteria.
@@ -247,13 +244,13 @@
             requestAnimationFrame(function () {
                 gl.readPixels(coords[0], coords[1], 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
                 for (i = 0; i < bSize.length; i++) {
-                    console.log(pixels[0] + " " + bCol[i * 3])
                     if (bActive[i] && Math.abs(pixels[0] / 256 - bCol[i * 3]) < 0.01
                                    && Math.abs(pixels[1] / 256 - bCol[i * 3 + 1]) < 0.01
                                    && Math.abs(pixels[2] / 256 - bCol[i * 3 + 2] < 0.01))
                     {
                         bActive[i] = false;
-                        console.log(bActive);
+                        score += 5000 - timer;
+                        console.log(5000 - timer +" points added. New score is: "+score);
                     }
                 }
                 
@@ -298,6 +295,20 @@
                 bSize[i] += 0.00025
                 //console.log(bSize);
             }
+			
+			for(var i = 0; i < numBacteria-1; i++)
+			{
+				if(bActive[i])
+				{
+					for(var j = i+1; j < numBacteria; j++)
+					{
+						if(intersecting(i, j, bSize[i], bSize[j]))
+						{
+							console.log(i+ " "+j);
+						}
+					}
+				}
+			}
             
             //set model matrix to I4
             mo_matrix[0] = 1, mo_matrix[1] = 0, mo_matrix[2] = 0,
@@ -327,9 +338,52 @@
             gl.uniform1fv(_BacActive, bActive);
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
             gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
-            window.requestAnimationFrame(animate);
+            
+            if (isGameOver() == false)
+                window.requestAnimationFrame(animate);
+            
+            timer++;
         }
         animate(0);
+        
+        function isGameOver(){
+            var gameOver = false;
+            var anyAlive = false;
+            var tooBigCount = 0;
+            for (var i = 0; i < numBacteria; i++){
+                if (bActive[i] == true){
+                    anyAlive = true;
+                }
+                if (bSize[i] >= 0.5){
+                    tooBigCount ++;
+                    console.log("Circle "+i+" is too big.");
+                }
+            }
+            if (anyAlive == false){
+                console.log("You win! Final score is: "+score);
+                gameOver = true;
+            }
+            if (tooBigCount >= 2){
+                console.log("You lose... Final score is: "+score);
+                gameOver = true;
+            }
+            return gameOver;
+        }
+		
+		function intersecting(s1, s2, r1, r2)
+		{
+			var dx = bPos[s1] - bPos[s2];
+			var dy = bPos[s1+1] - bPos[s2+1];
+			var dz = bPos[s1+2] - bPos[s2+2];
+			var distance = (dx*dx) + (dy*dy) + (dz*dz);
+			if(distance < (r1+r2)*(r1+r2)/9)
+			{
+				return true;
+			}
+			
+			else
+				return false;
+		}
     </script>
 </body>
 </html>
