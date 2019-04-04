@@ -4,6 +4,10 @@
     <canvas width="570" height="570" id="my_Canvas"></canvas>
 
     <script>
+        
+        var score = 0;
+        var timer = 0;
+        
         /*============= Creating a canvas ======================*/
         var canvas = document.getElementById('my_Canvas');
         gl = canvas.getContext('experimental-webgl');
@@ -254,6 +258,8 @@
                     {
                         bActive[i] = false;
                         console.log(bActive);
+                        score += 5000 - timer;
+                        console.log(5000 - timer +" points added. New score is: "+score);
                     }
                 }
                 
@@ -327,9 +333,42 @@
             gl.uniform1fv(_BacActive, bActive);
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
             gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
-            window.requestAnimationFrame(animate);
+            
+            if (isGameOver() == false)
+                window.requestAnimationFrame(animate);
+            
+            timer++;
         }
         animate(0);
+        
+        function isGameOver(){
+            var gameOver = false;
+            var anyAlive = false;
+            var tooBigCount = 0;
+
+            for (var i = 0; i < numBacteria; i++){
+                if (bActive[i] == true){
+                    anyAlive = true;
+                }
+
+                if (bSize[i] >= 0.5){
+                    tooBigCount ++;
+                    console.log("Circle "+i+" is too big.");
+                }
+            }
+
+            if (anyAlive == false){
+                console.log("You win! Final score is: "+score);
+                gameOver = true;
+            }
+
+            if (tooBigCount >= 2){
+                console.log("You lose... Final score is: "+score);
+                gameOver = true;
+            }
+
+            return gameOver;
+        }
     </script>
 </body>
 </html>
