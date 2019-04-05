@@ -19,8 +19,19 @@
 		var numBacteria = Math.floor(Math.random() * 10)+3; // gets number of bacteria between 3 and 10
         //var numBacteria = 10;
 		var bSize = [], bPos = [], bCol = [], bActive = [];
-		var posCounter = 0, colCounter = 0;
-		for(var i = 0; i < numBacteria; i++)
+        bSize[0] = 0;
+        bPos[0] = 0;
+        bPos[1] = 0;
+        bPos[2] = 0;
+        bPos[3] = 1;
+        bCol[0] = 0;
+        bCol[1] = 1;
+        bCol[2] = 0;
+        bActive[0] = false;
+        
+		var posCounter = 4, colCounter = 3;
+        
+		for(var i = 1; i < numBacteria; i++)
 		{
 			// get random x, y, and z coordinates betweeon 0 and 500
 			var x = Math.floor(Math.random() * 500-250);
@@ -247,12 +258,18 @@
             
             requestAnimationFrame(function () {
                 gl.readPixels(coords[0], coords[1], 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-                for (i = 0; i < bSize.length; i++) {
+                for (i = 1; i < bSize.length; i++) {
                     if (bActive[i] && Math.abs(pixels[0] / 256 - bCol[i * 3]) < 0.01
                                    && Math.abs(pixels[1] / 256 - bCol[i * 3 + 1]) < 0.01
                                    && Math.abs(pixels[2] / 256 - bCol[i * 3 + 2] < 0.01))
                     {
                         bActive[i] = false;
+                        bSize[0] = 0.0;
+                        bPos[0] = bPos[(i*4)];
+                        bPos[1] = bPos[(i*4)+1];
+                        bPos[2] = bPos[(i*4)+2];
+                        bPos[3] = 1;
+                        bActive[0] = true;
                         score += 5000 - timer;
 
 			document.getElementById("score").innerHTML = "Score: "+score;
@@ -296,16 +313,23 @@
                 dX *= AMORTIZATION, dY *= AMORTIZATION;
                 THETA += dX, PHI += dY;
             }
-            for(i = 0; i < bSize.length; i++)
+            for(i = 1; i < bSize.length; i++)
             {
                 bSize[i] += 0.00025
                 //console.log(bSize);
             }
+            bSize[0] += 0.002
 			
-			for(var i = 0; i < numBacteria-1; i++)
+			for(var i = 1; i < numBacteria-1; i++)
 			{
 				if(bActive[i])
 				{
+                    if(intersecting(0, i, bSize[0], bSize[i])){
+                        bActive[i] = false;
+                        console.log("poison killed circle: "+i);
+                        score += 5000 - timer;
+                    }
+                    
 					for(var j = i+1; j < numBacteria; j++)
 					{
 						if(intersecting(i, j, bSize[i], bSize[j]) && bActive[i] && bActive[j])
@@ -366,7 +390,7 @@
             var gameOver = false;
             var anyAlive = false;
             var tooBigCount = 0;
-            for (var i = 0; i < numBacteria; i++){
+            for (var i = 1; i < numBacteria; i++){
                 if (bActive[i] == true){
                     anyAlive = true;
                 }
