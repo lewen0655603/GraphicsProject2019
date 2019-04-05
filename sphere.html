@@ -13,7 +13,7 @@
         gl = canvas.getContext('experimental-webgl');
         /*========== Defining and storing the geometry ==========*/
 		var numBacteria = Math.floor(Math.random() * 10)+3; // gets number of bacteria between 3 and 10
-
+        //var numBacteria = 10;
 		var bSize = [], bPos = [], bCol = [], bActive = [];
 		var posCounter = 0, colCounter = 0;
 		for(var i = 0; i < numBacteria; i++)
@@ -354,10 +354,12 @@
                 if (bActive[i] == true){
                     anyAlive = true;
                 }
+                /*
                 if (bSize[i] >= 0.5){
                     tooBigCount ++;
                     console.log("Circle "+i+" is too big.");
                 }
+                */
             }
             if (anyAlive == false){
                 console.log("You win! Final score is: "+score);
@@ -371,18 +373,36 @@
         }
 		
 		function intersecting(s1, s2, r1, r2)
-		{
-			var dx = bPos[s1] - bPos[s2];
-			var dy = bPos[s1+1] - bPos[s2+1];
-			var dz = bPos[s1+2] - bPos[s2+2];
-			var distance = (dx*dx) + (dy*dy) + (dz*dz);
-			if(distance < (r1+r2)*(r1+r2)/9)
-			{
-				return true;
+        {
+		    var weight1 = r1 / (r1 + r2);
+		    var weight2 = r2 / (r1 + r2);
+		    var mid = [];
+		    mid[0] = bPos[s1 * 4] * weight1 + bPos[s2 * 4] * weight2;
+		    mid[1] = bPos[s1 * 4+1] * weight1 + bPos[s2 * 4+1] * weight2;
+		    mid[2] = bPos[s1 * 4 + 2] * weight1 + bPos[s2 * 4 + 2] * weight2;
+		    //console.log(mid);
+		    var midlength = Math.sqrt(mid[0] * mid[0] + mid[1] * mid[1] + mid[2] * mid[2]);
+		    mid[0] /= midlength;
+		    mid[1] /= midlength;
+		    mid[2] /= midlength;
+		    //console.log(mid);
+
+		    var dx = bPos[s1 * 4] - mid[0];
+			var dy = bPos[s1 * 4 + 1] - mid[1];
+			var dz = bPos[s1 * 4 + 2] - mid[2];
+			var distance_2 = (dx * dx) + (dy * dy) + (dz * dz);
+			if (distance_2 > r1*r1) {
+			    return false;
 			}
-			
-			else
-				return false;
+
+			var dx = bPos[s2 * 4] - mid[0];
+			var dy = bPos[s2 * 4 + 1] - mid[1];
+			var dz = bPos[s2 * 4 + 2] - mid[2];
+			var distance_2 = (dx * dx) + (dy * dy) + (dz * dz);
+			if (distance_2 > r2 * r2) {
+			    return false;
+			}
+			return true;
 		}
     </script>
 </body>
