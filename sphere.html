@@ -315,16 +315,16 @@
             }
             for(i = 1; i < bSize.length; i++)
             {
-                bSize[i] += 0.00025
+                if (bSize[i] < 0.5) bSize[i] += 0.00025;
                 //console.log(bSize);
             }
-            bSize[0] += 0.002
+            bSize[0] += 0.004 * (0.5 - bSize[0]);
 			
 			for(var i = 1; i < numBacteria-1; i++)
 			{
 				if(bActive[i])
 				{
-                    if(intersecting(0, i, bSize[0], bSize[i])){
+                    if(bActive[0] && intersecting(0, i, bSize[0], bSize[i])){
                         bActive[i] = false;
                         console.log("poison killed circle: "+i);
                         score += 5000 - timer;
@@ -393,12 +393,13 @@
             for (var i = 1; i < numBacteria; i++){
                 if (bActive[i] == true){
                     anyAlive = true;
+                    if (bSize[i] >= 0.5) {
+                        tooBigCount++;
+                        console.log("Circle " + i + " is too big.");
+                    }
                 }
                 
-                if (bSize[i] >= 0.5){
-                    tooBigCount ++;
-                    console.log("Circle "+i+" is too big.");
-                }
+                
                 
             }
             if (anyAlive == false){
@@ -426,6 +427,14 @@
 		    mid[1] /= midlength;
 		    mid[2] /= midlength;
 		    //console.log(mid);
+
+		    var dx = bPos[s1 * 4] - bPos[s2 * 4];
+		    var dy = bPos[s1 * 4 + 1] - bPos[s2 * 4 + 1];
+		    var dz = bPos[s1 * 4 + 2] - bPos[s2 * 4 + 2];
+		    var distance_2 = (dx * dx) + (dy * dy) + (dz * dz);
+		    if (distance_2 < r1 * r1 || distance_2 < r2 * r2) {
+		        return true;
+		    }
 
 		    var dx = bPos[s1 * 4] - mid[0];
 			var dy = bPos[s1 * 4 + 1] - mid[1];
