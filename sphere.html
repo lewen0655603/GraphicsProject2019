@@ -2,6 +2,10 @@
 <html>
 <body>
     <canvas width="570" height="570" id="my_Canvas"></canvas>
+	
+	<p id = "score">Score: 0</p>
+	<p id = "update"></p>
+
 
     <script>
         
@@ -250,7 +254,9 @@
                     {
                         bActive[i] = false;
                         score += 5000 - timer;
-                        console.log(5000 - timer +" points added. New score is: "+score);
+
+			document.getElementById("score").innerHTML = "Score: "+score;
+			document.getElementById("update").innerHTML = 5000-timer + " points added.";
                     }
                 }
                 
@@ -372,11 +378,11 @@
                 
             }
             if (anyAlive == false){
-                console.log("You win! Final score is: "+score);
+                document.getElementById("update").innerHTML = "You win!";
                 gameOver = true;
             }
             if (tooBigCount >= 2){
-                console.log("You lose... Final score is: "+score);
+		document.getElementById("update").innerHTML = "You lose...";
                 gameOver = true;
             }
             return gameOver;
