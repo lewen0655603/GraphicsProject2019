@@ -13,7 +13,7 @@
         gl = canvas.getContext('experimental-webgl');
         /*========== Defining and storing the geometry ==========*/
 		var numBacteria = Math.floor(Math.random() * 10)+3; // gets number of bacteria between 3 and 10
-        //var numBacteria = 10;
+        //var numBacteria = 2;
 		var bSize = [], bPos = [], bCol = [], bActive = [];
 		var posCounter = 0, colCounter = 0;
 		for(var i = 0; i < numBacteria; i++)
@@ -30,7 +30,7 @@
 			y = y/length;
 			z = z/length;
 			
-			bSize[i] = 0;
+			bSize[i] = 0+i/50.0;
 			bActive[i] = true;
 			
 			bPos[posCounter] = x;
@@ -374,8 +374,8 @@
 		
 		function intersecting(s1, s2, r1, r2)
         {
-		    var weight1 = r1 / (r1 + r2);
-		    var weight2 = r2 / (r1 + r2);
+		    var weight1 = r2 / (r1 + r2);
+		    var weight2 = r1 / (r1 + r2);
 		    var mid = [];
 		    mid[0] = bPos[s1 * 4] * weight1 + bPos[s2 * 4] * weight2;
 		    mid[1] = bPos[s1 * 4+1] * weight1 + bPos[s2 * 4+1] * weight2;
